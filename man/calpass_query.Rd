@@ -60,7 +60,7 @@ df \%>\%
     , gender=gender
     , birthdate
   )) 
-dfResults <- calpass_query(interSegmentKey=df$isk
+dfResults <- calpass_query_many(interSegmentKey=df$isk
   , token=cp_token
   , endpoint='transcript'
 )

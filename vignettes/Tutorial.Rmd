@@ -68,7 +68,7 @@ After we have the `interSegmentKey`'s, we can now query data from CalPASS.
 calpass_query(interSegmentKey=isk
             , token=cp_token, endpoint='transcript')
 ## multiple
-dfResults <- calpass_query(interSegmentKey=df$isk
+dfResults <- calpass_query_many(interSegmentKey=df$isk
                          , token=cp_token
                          , endpoint='transcript'
                            )

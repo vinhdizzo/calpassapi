@@ -131,7 +131,7 @@ calpass_get_token <- function(username=Sys.getenv('cp_api_uid'), password=Sys.ge
 ##'     , gender=gender
 ##'     , birthdate
 ##'   )) 
-##' dfResults <- calpass_query(interSegmentKey=df$isk
+##' dfResults <- calpass_query_many(interSegmentKey=df$isk
 ##'   , token=cp_token
 ##'   , endpoint='transcript'
 ##' )
