@@ -6,6 +6,8 @@
 ## setwd('..')
 ## install('calpassapi')
 
+# Notes: on httr # https://earlconf.com/2017/downloads/sanfrancisco/presentations/earl2017_-_api_interface_with_r_-_jeremy_morris.pdf
+
 ##' Create interSegmentKey's from students' first names, last names, genders, and birthdates
 ##'
 ##' @title Create interSegmentKey's for students
