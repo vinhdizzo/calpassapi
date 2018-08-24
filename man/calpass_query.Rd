@@ -67,7 +67,7 @@ dfResults <- calpass_query(interSegmentKey=df$isk
 }
 }
 \references{
-\href{MMAP API V1}{https://mmap.calpassplus.org/docs/index.html}
+\href{https://mmap.calpassplus.org/docs/index.html}{MMAP API V1}
 }
 \author{
 Vinh Nguyen

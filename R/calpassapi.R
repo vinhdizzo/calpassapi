@@ -77,7 +77,7 @@ calpass_create_isk <- function(first_name, last_name, gender, birthdate) {
 ##' @param verbose If \code{TRUE}, then print http exchanges (to assist with debugging).  Defaults to \code{FALSE}.
 ##' @return CalPASS token string
 ##' @author Vinh Nguyen
-##' @references \href{MMAP API V1: Getting An Access Token Using User Credentials}{https://mmap.calpassplus.org/Documentation/Authentication}
+##' @references \href{https://mmap.calpassplus.org/Documentation/Authentication}{MMAP API V1: Getting An Access Token Using User Credentials}
 ##' @examples
 ##' \dontrun{
 ##' cp_token <- calpass_get_token(username='my_cp_api_uid', password='my_cp_api_pwd')
@@ -103,7 +103,7 @@ calpass_get_token <- function(username=Sys.getenv('cp_api_uid'), password=Sys.ge
 ##' @param endpoint the api endpoint to use; defaults to \code{'transcript'}.
 ##' @return a data frame with columns \code{interSegmentKey}, \code{status_code} (the http response code: 200 means student was found, 204 means student was not found, 429 means the api limit was reached and student was not processed, and anything else in the 400's correspond to http errors.)
 ##' @author Vinh Nguyen
-##' @references \href{MMAP API V1}{https://mmap.calpassplus.org/docs/index.html}
+##' @references \href{https://mmap.calpassplus.org/docs/index.html}{MMAP API V1}
 ##' @examples
 ##' \dontrun{
 ##' ## get access token

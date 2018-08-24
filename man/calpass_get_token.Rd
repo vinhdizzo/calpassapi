@@ -30,7 +30,7 @@ cp_token <- calpass_get_token(username='my_cp_api_uid', password='my_cp_api_pwd'
 }
 }
 \references{
-\href{MMAP API V1: Getting An Access Token Using User Credentials}{https://mmap.calpassplus.org/Documentation/Authentication}
+\href{https://mmap.calpassplus.org/Documentation/Authentication}{MMAP API V1: Getting An Access Token Using User Credentials}
 }
 \author{
 Vinh Nguyen
