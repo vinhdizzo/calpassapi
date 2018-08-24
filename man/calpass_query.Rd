@@ -30,7 +30,7 @@ Query data from CalPASS API endpoints for a single interSegmentKey
 }
 \section{Functions}{
 \itemize{
-\item \code{calpass_query_many}: Query data from CalPASS API endpoints with a vector of interSegmentKey's
+\item \code{calpass_query_many}: Query data from CalPASS API endpoints with a vector of interSegmentKey's.  The number of rows returned corresponds to the number of unique interSegmentKey's.
 }}
 
 \examples{

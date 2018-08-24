@@ -157,7 +157,7 @@ calpass_query <- function(interSegmentKey, token, api_url='https://mmap.calpassp
   return(results_df)
 }
 
-##' @describeIn calpass_query Query data from CalPASS API endpoints with a vector of interSegmentKey's
+##' @describeIn calpass_query Query data from CalPASS API endpoints with a vector of interSegmentKey's.  The number of rows returned corresponds to the number of unique interSegmentKey's.
 calpass_query_many <- function(interSegmentKey, token, api_url='https://mmap.calpassplus.org/api', endpoint=c('transcript', 'placement')) {
   if (length(unique(interSegmentKey)) < length(interSegmentKey)) {
     warning("interSegmentKey contains duplicates.  Will execute for unique cases only (returned rows will be the number of unique cases).")
@@ -166,6 +166,7 @@ calpass_query_many <- function(interSegmentKey, token, api_url='https://mmap.cal
   endpoint <- match.arg(endpoint)
   results_list_of_df <- lapply(interSegmentKey, calpass_query, token=token, api_url=api_url, endpoint=endpoint)
   results_single_df <- do.call('bind_rows', results_list_of_df)
+  if (any(results_single_df$status_code == 429)) warning('Status code of 429 returned for at least one API call, which means the API limit was reached.  Retry again after an hour.')
   dCp <- data.frame(interSegmentKey=interSegmentKey, results_single_df, stringsAsFactors=FALSE)
   return(dCp)
 }
