@@ -26,6 +26,15 @@ library(calpassapi)
 library(dplyr) # Ease in manipulations with data frames
 ```
 
+## Setup
+If the user does not want to expose their CalPASS API username and password in their R script, then it is recommended that the user specify their credentials in their `.Renviron` file in their home directory (execute `Sys.getenv('HOME')` in R to determine the R home directory) as follows:
+```
+cp_api_uid='my_username'
+cp_api_pwd='my_password'
+```
+
+R will automatically load these environment variables at start up and the user will not have to specify `username` and `password` in `calpass_get_token`.
+
 ## Obtain access token
 First we need to authenticate with CalPASS using our credentials in order to obtain a token that will allow us to query data from the API.
 

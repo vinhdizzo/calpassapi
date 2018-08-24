@@ -88,6 +88,13 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(calpassapi)
 <span class="kw">library</span>(dplyr) <span class="co"># Ease in manipulations with data frames</span></code></pre></div>
 </div>
+<div id="setup" class="section level2">
+<h2>Setup</h2>
+<p>If the user does not want to expose their CalPASS API username and password in their R script, then it is recommended that the user specify their credentials in their <code>.Renviron</code> file in their home directory (execute <code>Sys.getenv('HOME')</code> in R to determine the R home directory) as follows:</p>
+<pre><code>cp_api_uid='my_username'
+cp_api_pwd='my_password'</code></pre>
+<p>R will automatically load these environment variables at start up and the user will not have to specify <code>username</code> and <code>password</code> in <code>calpass_get_token</code>.</p>
+</div>
 <div id="obtain-access-token" class="section level2">
 <h2>Obtain access token</h2>
 <p>First we need to authenticate with CalPASS using our credentials in order to obtain a token that will allow us to query data from the API.</p>
@@ -132,7 +139,7 @@ df <span class="op">%&gt;%</span>
 <span class="kw">calpass_query</span>(<span class="dt">interSegmentKey=</span>isk
             , <span class="dt">token=</span>cp_token, <span class="dt">endpoint=</span><span class="st">'transcript'</span>)
 ## multiple
-dfResults &lt;-<span class="st"> </span><span class="kw">calpass_query</span>(<span class="dt">interSegmentKey=</span>df<span class="op">$</span>isk
+dfResults &lt;-<span class="st"> </span><span class="kw">calpass_query_many</span>(<span class="dt">interSegmentKey=</span>df<span class="op">$</span>isk
                          , <span class="dt">token=</span>cp_token
                          , <span class="dt">endpoint=</span><span class="st">'transcript'</span>
                            )</code></pre></div>
