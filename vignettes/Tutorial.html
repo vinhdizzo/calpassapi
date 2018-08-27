@@ -98,8 +98,8 @@ cp_api_pwd='my_password'</code></pre>
 <div id="obtain-access-token" class="section level2">
 <h2>Obtain access token</h2>
 <p>First we need to authenticate with CalPASS using our credentials in order to obtain a token that will allow us to query data from the API.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">cp_token &lt;-<span class="st"> </span><span class="kw">calpass_get_token</span>(<span class="dt">username=</span><span class="st">'my_cp_api_uid'</span>, <span class="dt">password=</span><span class="st">'my_cp_api_pwd'</span>)
-<span class="co"># cp_token &lt;- calpass_get_token() ## if cp_api_uid and cp_api_pwd are set in .Renviron</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">cp_token &lt;-<span class="st"> </span><span class="kw">calpass_get_token</span>(<span class="dt">username=</span><span class="st">'my_cp_api_uid'</span>, <span class="dt">password=</span><span class="st">'my_cp_api_pwd'</span>, <span class="dt">client_id=</span><span class="st">'my_client_id'</span>, <span class="dt">scope=</span><span class="st">'my_scope'</span>)
+<span class="co"># cp_token &lt;- calpass_get_token(client_id='my_client_id', scope='my_scope') ## if cp_api_uid and cp_api_pwd are set in .Renviron</span></code></pre></div>
 <p>This token will be used in <code>calpass_query</code> and <code>calpass_query_many</code> in the <code>token</code> argument.</p>
 </div>
 <div id="create-intersegmentkeys-for-each-student" class="section level2">

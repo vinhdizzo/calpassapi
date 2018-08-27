@@ -5,7 +5,7 @@
 \title{Obtain CalPASS API token}
 \usage{
 calpass_get_token(username = Sys.getenv("cp_api_uid"),
-  password = Sys.getenv("cp_api_pwd"),
+  password = Sys.getenv("cp_api_pwd"), client_id, scope,
   auth_endpoint = "https://oauth.calpassplus.org/connect/token",
   verbose = FALSE)
 }
@@ -13,6 +13,10 @@ calpass_get_token(username = Sys.getenv("cp_api_uid"),
 \item{username}{API username.  For security reasons, the user could specify \code{cp_api_uid} in the user's \code{.Renviron} file in the user's home directory (execute \code{Sys.getenv('HOME')} in R to check path to home directory).  That way, the user does not have to hard code the username in their R script.  The function uses for the username here by default.}
 
 \item{password}{API password.  The user could specify \code{cp_api_pwd} as above.}
+
+\item{client_id}{parameter needed in the http body in order to obtain a token (unique to \code{username})}
+
+\item{scope}{parameter needed in the http body in order to obtain a token (unique to \code{username})}
 
 \item{auth_endpoint}{Authentication endpoint/url, defaults to \code{'https://oauth.calpassplus.org/connect/token'}.}
 
@@ -26,7 +30,10 @@ Obtain a token from CalPASS using your API credentials, which should allow acces
 }
 \examples{
 \dontrun{
-cp_token <- calpass_get_token(username='my_cp_api_uid', password='my_cp_api_pwd')
+cp_token <- calpass_get_token(username='my_cp_api_uid', password='my_cp_api_pwd'
+  , client_id='my_client_id'
+  , scope='my_scope'
+  )
 }
 }
 \references{

@@ -73,6 +73,8 @@ calpass_create_isk <- function(first_name, last_name, gender, birthdate) {
 ##' @title Obtain CalPASS API token
 ##' @param username API username.  For security reasons, the user could specify \code{cp_api_uid} in the user's \code{.Renviron} file in the user's home directory (execute \code{Sys.getenv('HOME')} in R to check path to home directory).  That way, the user does not have to hard code the username in their R script.  The function uses for the username here by default.
 ##' @param password API password.  The user could specify \code{cp_api_pwd} as above.
+##' @param client_id parameter needed in the http body in order to obtain a token (unique to \code{username})
+##' @param scope parameter needed in the http body in order to obtain a token (unique to \code{username})
 ##' @param auth_endpoint Authentication endpoint/url, defaults to \code{'https://oauth.calpassplus.org/connect/token'}.
 ##' @param verbose If \code{TRUE}, then print http exchanges (to assist with debugging).  Defaults to \code{FALSE}.
 ##' @return CalPASS token string
@@ -80,14 +82,17 @@ calpass_create_isk <- function(first_name, last_name, gender, birthdate) {
 ##' @references \href{https://mmap.calpassplus.org/Documentation/Authentication}{MMAP API V1: Getting An Access Token Using User Credentials}
 ##' @examples
 ##' \dontrun{
-##' cp_token <- calpass_get_token(username='my_cp_api_uid', password='my_cp_api_pwd')
+##' cp_token <- calpass_get_token(username='my_cp_api_uid', password='my_cp_api_pwd'
+##'   , client_id='my_client_id'
+##'   , scope='my_scope'
+##'   )
 ##' }
 ##' @export
 ##' @import httr
-calpass_get_token <- function(username=Sys.getenv('cp_api_uid'), password=Sys.getenv('cp_api_pwd'), auth_endpoint='https://oauth.calpassplus.org/connect/token', verbose=FALSE) {
+calpass_get_token <- function(username=Sys.getenv('cp_api_uid'), password=Sys.getenv('cp_api_pwd'), client_id, scope, auth_endpoint='https://oauth.calpassplus.org/connect/token',verbose=FALSE) {
   cp_response <- content(POST(url=auth_endpoint
                             , content_type('application/x-www-form-urlencoded') # added to header via config= param
-                            , body=list(grant_type='password', username=username, password=password, client_id='remote', scope='api')
+                            , body=list(grant_type='password', username=username, password=password, client_id=client_id, scope=scope)
                             , encode='form'
                             , if (verbose) verbose() else NULL
         ))

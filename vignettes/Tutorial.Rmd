@@ -39,8 +39,8 @@ R will automatically load these environment variables at start up and the user w
 First we need to authenticate with CalPASS using our credentials in order to obtain a token that will allow us to query data from the API.
 
 ```{r, eval=FALSE}
-cp_token <- calpass_get_token(username='my_cp_api_uid', password='my_cp_api_pwd')
-# cp_token <- calpass_get_token() ## if cp_api_uid and cp_api_pwd are set in .Renviron
+cp_token <- calpass_get_token(username='my_cp_api_uid', password='my_cp_api_pwd', client_id='my_client_id', scope='my_scope')
+# cp_token <- calpass_get_token(client_id='my_client_id', scope='my_scope') ## if cp_api_uid and cp_api_pwd are set in .Renviron
 ```
 
 This token will be used in `calpass_query` and `calpass_query_many` in the `token` argument.
