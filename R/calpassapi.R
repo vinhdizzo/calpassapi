@@ -101,6 +101,10 @@ calpass_get_token <- function(username=Sys.getenv('cp_api_uid'), password=Sys.ge
 ##' @param token a token string created from \link[calpassapi]{calpass_get_token}.
 ##' @param api_url defaults to \code{'https://mmap.calpassplus.org/api'}, but can be overrode if CalPASS changes the url.
 ##' @param endpoint the api endpoint to use; defaults to \code{'transcript'}.
+##' @param verbose If \code{TRUE}, then print http exchanges (to assist with debugging).  Defaults to \code{FALSE}.
+##' @param api_call_limit the number of api calls allowed per \code{limit_per_n_sec}; defaults to 150 calls per 60 seconds.
+##' @param limit_per_n_sec time frame where \code{api_call_limit} is applicable to; defaults to 60 seconds.
+##' @param wait indicates whether the user is willing to wait \code{limit_per_n_sec} seconds per batch if the number of unique values in \code{interSegmentKey} is greater than \code{api_call_limit}; defaults to \code{FALSE}.  The user should set to \code{TRUE} if there are more than \code{api_call_limit} number of calls to be executed.
 ##' @return a data frame with columns \code{interSegmentKey}, \code{status_code} (the http response code: 200 means student was found, 204 means student was not found, 429 means the api limit was reached and student was not processed, and anything else in the 400's correspond to http errors.)
 ##' @author Vinh Nguyen
 ##' @references \href{https://mmap.calpassplus.org/docs/index.html}{MMAP API V1}
@@ -140,7 +144,7 @@ calpass_get_token <- function(username=Sys.getenv('cp_api_uid'), password=Sys.ge
 ##' @import httr
 ##' @importFrom jsonlite fromJSON
 ##' @importFrom dplyr bind_rows
-calpass_query <- function(interSegmentKey, token, api_url='https://mmap.calpassplus.org/api', endpoint=c('transcript', 'placement')) {
+calpass_query <- function(interSegmentKey, token, api_url='https://mmap.calpassplus.org/api', endpoint=c('transcript', 'placement'), verbose=FALSE) {
   endpoint <- match.arg(endpoint)
   cp_response <- GET(url=paste0(api_url, '/', endpoint, '/', interSegmentKey)
                    , add_headers(c(Authorization=paste('Bearer', token)))
@@ -158,15 +162,43 @@ calpass_query <- function(interSegmentKey, token, api_url='https://mmap.calpassp
 }
 
 ##' @describeIn calpass_query Query data from CalPASS API endpoints with a vector of interSegmentKey's.  The number of rows returned corresponds to the number of unique interSegmentKey's.
-calpass_query_many <- function(interSegmentKey, token, api_url='https://mmap.calpassplus.org/api', endpoint=c('transcript', 'placement')) {
+##' @export
+calpass_query_many <- function(interSegmentKey, token, api_url='https://mmap.calpassplus.org/api', endpoint=c('transcript', 'placement'), verbose=FALSE, api_call_limit=150, limit_per_n_sec=60, wait=FALSE) {
   if (length(unique(interSegmentKey)) < length(interSegmentKey)) {
     warning("interSegmentKey contains duplicates.  Will execute for unique cases only (returned rows will be the number of unique cases).")
     interSegmentKey <- unique(interSegmentKey)
   }
-  endpoint <- match.arg(endpoint)
-  results_list_of_df <- lapply(interSegmentKey, calpass_query, token=token, api_url=api_url, endpoint=endpoint)
+
+  n_isk <- length(interSegmentKey)
+
+  if (n_isk > api_call_limit & wait==FALSE) {
+    stop(paste0("There are ", n_isk, " unique elements in `interSegmentKey`, which is greater than `api_call_limit` (", api_call_limit, "). Set `wait` to TRUE to call API in batches of `api_call_limit`."))
+  }
+
+  n_batches <- ceiling(n_isk / api_call_limit)
+  
+  endpoint <- match.arg(endpoint) 
+
+  if (n_batches==1) {
+    results_list_of_df <- lapply(interSegmentKey, calpass_query, token=token, api_url=api_url, endpoint=endpoint)
+  } else {
+    results_of_batches <- list()
+    for (i in 1:n_batches) {
+      cat('Batch i =', i, 'of', n_batches, '\n')
+      idx <- (api_call_limit*(i-1) + 1):pmin(api_call_limit*i, n_isk)
+      cat('  Indices:', min(idx), 'to', max(idx), '\n')
+      results_of_batches[[i]] <- lapply(interSegmentKey[idx], calpass_query, token=token, api_url=api_url, endpoint=endpoint)
+      if (i < n_batches) {
+        cat('  Waiting', limit_per_n_sec, 'seconds...\n')
+        Sys.sleep(limit_per_n_sec + 1)
+      }
+    }
+    results_list_of_df <- do.call('c', results_of_batches)
+  }
+  
   results_single_df <- do.call('bind_rows', results_list_of_df)
   if (any(results_single_df$status_code == 429)) warning('Status code of 429 returned for at least one API call, which means the API limit was reached.  Retry again after an hour.')
   dCp <- data.frame(interSegmentKey=interSegmentKey, results_single_df, stringsAsFactors=FALSE)
+  rownames(dCp) <- NULL
   return(dCp)
 }

@@ -3,6 +3,7 @@
 export(calpass_create_isk)
 export(calpass_get_token)
 export(calpass_query)
+export(calpass_query_many)
 import(httr)
 importFrom(digest,digest)
 importFrom(dplyr,bind_rows)

@@ -12,7 +12,7 @@
 
 <meta name="author" content="Vinh Nguyen" />
 
-<meta name="date" content="2018-08-24" />
+<meta name="date" content="2018-08-27" />
 
 <title>calpassapi Tutorial</title>
 
@@ -70,7 +70,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">calpassapi Tutorial</h1>
 <h4 class="author"><em>Vinh Nguyen</em></h4>
-<h4 class="date"><em>2018-08-24</em></h4>
+<h4 class="date"><em>2018-08-27</em></h4>
 
 
 
@@ -142,6 +142,18 @@ df <span class="op">%&gt;%</span>
 dfResults &lt;-<span class="st"> </span><span class="kw">calpass_query_many</span>(<span class="dt">interSegmentKey=</span>df<span class="op">$</span>isk
                          , <span class="dt">token=</span>cp_token
                          , <span class="dt">endpoint=</span><span class="st">'transcript'</span>
+                           )</code></pre></div>
+</div>
+<div id="multiple-batches-when-there-are-many-intersegmentkeys" class="section level2">
+<h2>Multiple batches (when there are many interSegmentKey’s)</h2>
+<p>The CALPASS API currently has a limit of 150 calls per minute (60 seconds). These are specified by default in the <code>api_call_limit</code> and <code>limit_per_n_sec</code> arguments in <code>calpass_query_many</code>. If the user has a need beyond these limits, or if the user would like to break the calls into batches, then the user should specify <code>wait=TRUE</code>, and <code>calpass_query_many</code> will break the calls into batches of <code>api_call_limit</code> calls.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## batches
+dfResults &lt;-<span class="st"> </span><span class="kw">calpass_query_many</span>(<span class="dt">interSegmentKey=</span>df<span class="op">$</span>isk
+                         , <span class="dt">token=</span>cp_token
+                         , <span class="dt">endpoint=</span><span class="st">'transcript'</span>
+                         , <span class="dt">api_call_limit=</span><span class="dv">2</span> ## batches of 2
+                         , <span class="dt">limit_per_n_sec=</span><span class="dv">10</span> ## every 10 seconds
+                         , <span class="dt">wait=</span><span class="ot">TRUE</span>
                            )</code></pre></div>
 </div>
 

@@ -82,3 +82,17 @@ dfResults <- calpass_query_many(interSegmentKey=df$isk
                          , endpoint='transcript'
                            )
 ```
+
+## Multiple batches (when there are many interSegmentKey's)
+The CALPASS API currently has a limit of 150 calls per minute (60 seconds).  These are specified by default in the `api_call_limit` and `limit_per_n_sec` arguments in `calpass_query_many`.  If the user has a need beyond these limits, or if the user would like to break the calls into batches, then the user should specify `wait=TRUE`, and `calpass_query_many` will break the calls into batches of `api_call_limit` calls.
+
+```{r, eval=FALSE}
+## batches
+dfResults <- calpass_query_many(interSegmentKey=df$isk
+                         , token=cp_token
+                         , endpoint='transcript'
+                         , api_call_limit=2 ## batches of 2
+                         , limit_per_n_sec=10 ## every 10 seconds
+                         , wait=TRUE
+                           )
+```

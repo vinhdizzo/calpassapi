@@ -1,0 +1,2 @@
+* 0.0.2
+  - Added support for querying the API in batches via `calpass_query_many`

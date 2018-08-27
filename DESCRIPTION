@@ -1,6 +1,6 @@
 Package: calpassapi
 Title: R Interface to Access CalPASS API
-Version: 0.0.1
+Version: 0.0.2
 Authors@R: person("Vinh", "Nguyen", email = "nguyenvq714@gmail.com", role = c("aut", "cre"))
 Description: Implements methods for querying data from CalPASS using its API.
  CalPASS Plus.  MMAP API V1. <https://mmap.calpassplus.org/docs/index.html>.
