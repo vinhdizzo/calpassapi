@@ -1,2 +1,8 @@
+* 0.0.3
+  - CalPASS API changes:
+    + token expires in 60 minutes
+    + there is a max limit of 3200 calls per 60 minutes
+  - calpass_get_token: no longer returns just the access_token string, but the entire response object, plus a calculated expiration time
+  - calpass_query_many: changed limits and added credential arguments
 * 0.0.2
   - Added support for querying the API in batches via `calpass_query_many`

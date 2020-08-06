@@ -5,19 +5,33 @@
 \alias{calpass_query_many}
 \title{Query data from CalPASS API endpoints}
 \usage{
-calpass_query(interSegmentKey, token,
-  api_url = "https://mmap.calpassplus.org/api", endpoint = c("transcript",
-  "placement"), verbose = FALSE)
+calpass_query(
+  interSegmentKey,
+  token,
+  api_url = "https://mmap.calpassplus.org/api",
+  endpoint = c("transcript", "placement"),
+  verbose = FALSE
+)
 
-calpass_query_many(interSegmentKey, token,
-  api_url = "https://mmap.calpassplus.org/api", endpoint = c("transcript",
-  "placement"), verbose = FALSE, api_call_limit = 150,
-  limit_per_n_sec = 60, wait = FALSE)
+calpass_query_many(
+  interSegmentKey,
+  token,
+  api_url = "https://mmap.calpassplus.org/api",
+  endpoint = c("transcript", "placement"),
+  verbose = FALSE,
+  api_call_limit = 3200,
+  limit_per_n_sec = 3600,
+  wait = FALSE,
+  token_username,
+  token_password,
+  token_client_id,
+  token_scope
+)
 }
 \arguments{
 \item{interSegmentKey}{for \code{calpass_query}, a single interSegmentKey; for \code{calpass_query_many}, a vector of interSgementKey's.  The interSegmentKey's can be created from \link[calpassapi]{calpass_create_isk}.}
 
-\item{token}{a token string created from \link[calpassapi]{calpass_get_token}.}
+\item{token}{(optional) a token object created from \link[calpassapi]{calpass_get_token}.  If this is not specified, then \code{token_username}, \code{token_password}, \code{token_client_id}, and \code{token_scope} should be specified.  The credentials approach is preferred for long runs to obtain refreshed tokens (tokens currently are valid for 1 hour).}
 
 \item{api_url}{defaults to \code{'https://mmap.calpassplus.org/api'}, but can be overrode if CalPASS changes the url.}
 
@@ -30,6 +44,14 @@ calpass_query_many(interSegmentKey, token,
 \item{limit_per_n_sec}{time frame where \code{api_call_limit} is applicable to; defaults to 60 seconds.}
 
 \item{wait}{indicates whether the user is willing to wait \code{limit_per_n_sec} seconds per batch if the number of unique values in \code{interSegmentKey} is greater than \code{api_call_limit}; defaults to \code{FALSE}.  The user should set to \code{TRUE} if there are more than \code{api_call_limit} number of calls to be executed.}
+
+\item{token_username}{(optional, required if \code{token} is not specified) username passed to \link[calpassapi]{calpass_get_token}.}
+
+\item{token_password}{(optional, required if \code{token} is not specified) password passed to \link[calpassapi]{calpass_get_token}.}
+
+\item{token_client_id}{(optional, required if \code{token} is not specified) client_id passed to \link[calpassapi]{calpass_get_token}.}
+
+\item{token_scope}{(optional, required if \code{token} is not specified) scope passed to \link[calpassapi]{calpass_get_token}.}
 }
 \value{
 a data frame with columns \code{interSegmentKey}, \code{status_code} (the http response code: 200 means student was found, 204 means student was not found, 429 means the api limit was reached and student was not processed, and anything else in the 400's correspond to http errors.)

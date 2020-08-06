@@ -60,13 +60,13 @@ gender <- c('Male', 'Female', 'X')
 birthdate <- c(20001231, 19990101, 19981111)
 df <- data.frame(firstname, lastname
                , gender, birthdate, stringsAsFactors=FALSE)
-df %>%
+df <- df %>%
   mutate(isk=calpass_create_isk(first_name=firstname
                               , last_name=lastname
                               , gender=gender
                               , birthdate
                                 ))
-
+df$isk
 ```
 
 ## Query data from CalPASS
@@ -81,10 +81,18 @@ dfResults <- calpass_query_many(interSegmentKey=df$isk
                          , token=cp_token
                          , endpoint='transcript'
                            )
+## can specify credentials
+dfResults <- calpass_query_many(interSegmentKey=df$isk
+                         , endpoint='transcript'
+                         , token_username='my_username'
+                         , token_password='my_password'
+                         , token_client_id='my_client_id'
+                         , token_scope='my_scope'
+                           )
 ```
 
 ## Multiple batches (when there are many interSegmentKey's)
-The CALPASS API currently has a limit of 150 calls per minute (60 seconds).  These are specified by default in the `api_call_limit` and `limit_per_n_sec` arguments in `calpass_query_many`.  If the user has a need beyond these limits, or if the user would like to break the calls into batches, then the user should specify `wait=TRUE`, and `calpass_query_many` will break the calls into batches of `api_call_limit` calls.
+The CALPASS API currently has a limit of 3200 calls per hour (3600 seconds).  These are specified by default in the `api_call_limit` and `limit_per_n_sec` arguments in `calpass_query_many`.  If the user has a need beyond these limits, or if the user would like to break the calls into batches, then the user should specify `wait=TRUE`, and `calpass_query_many` will break the calls into batches of `api_call_limit` calls.
 
 ```{r, eval=FALSE}
 ## batches

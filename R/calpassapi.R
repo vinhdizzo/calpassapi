@@ -90,26 +90,38 @@ calpass_create_isk <- function(first_name, last_name, gender, birthdate) {
 ##' @export
 ##' @import httr
 calpass_get_token <- function(username=Sys.getenv('cp_api_uid'), password=Sys.getenv('cp_api_pwd'), client_id, scope, auth_endpoint='https://oauth.calpassplus.org/connect/token',verbose=FALSE) {
+  cur_time <- Sys.time()
   cp_response <- content(POST(url=auth_endpoint
                             , content_type('application/x-www-form-urlencoded') # added to header via config= param
                             , body=list(grant_type='password', username=username, password=password, client_id=client_id, scope=scope)
                             , encode='form'
                             , if (verbose) verbose() else NULL
         ))
-  cp_token <- cp_response$access_token
-  return(cp_token)
+  # cp_token <- cp_response$access_token
+  # return(cp_token)
+  if (is.null(cp_response$access_token)) {
+    print(cp_response)
+    stop('Access token not returned.  See above printout for error message.')
+  }
+  cp_response$expiration_time <- Sys.time() + cp_response$expires_in
+  return(cp_response)
 }
 ##' Query data from CalPASS API endpoints for a single interSegmentKey
 ##'
 ##' @title Query data from CalPASS API endpoints
 ##' @param interSegmentKey for \code{calpass_query}, a single interSegmentKey; for \code{calpass_query_many}, a vector of interSgementKey's.  The interSegmentKey's can be created from \link[calpassapi]{calpass_create_isk}.
-##' @param token a token string created from \link[calpassapi]{calpass_get_token}.
+##' @param token (optional) a token object created from \link[calpassapi]{calpass_get_token}.  If this is not specified, then \code{token_username}, \code{token_password}, \code{token_client_id}, and \code{token_scope} should be specified.  The credentials approach is preferred for long runs to obtain refreshed tokens (tokens currently are valid for 1 hour).
 ##' @param api_url defaults to \code{'https://mmap.calpassplus.org/api'}, but can be overrode if CalPASS changes the url.
 ##' @param endpoint the api endpoint to use; defaults to \code{'transcript'}.
 ##' @param verbose If \code{TRUE}, then print http exchanges (to assist with debugging).  Defaults to \code{FALSE}.
 ##' @param api_call_limit the number of api calls allowed per \code{limit_per_n_sec}; defaults to 150 calls per 60 seconds.
 ##' @param limit_per_n_sec time frame where \code{api_call_limit} is applicable to; defaults to 60 seconds.
 ##' @param wait indicates whether the user is willing to wait \code{limit_per_n_sec} seconds per batch if the number of unique values in \code{interSegmentKey} is greater than \code{api_call_limit}; defaults to \code{FALSE}.  The user should set to \code{TRUE} if there are more than \code{api_call_limit} number of calls to be executed.
+##' @param wait indicates whether the user is willing to wait \code{limit_per_n_sec} seconds per batch if the number of unique values in \code{interSegmentKey} is greater than \code{api_call_limit}; defaults to \code{FALSE}.  The user should set to \code{TRUE} if there are more than \code{api_call_limit} number of calls to be executed.
+##' @param token_username (optional, required if \code{token} is not specified) username passed to \link[calpassapi]{calpass_get_token}.
+##' @param token_password (optional, required if \code{token} is not specified) password passed to \link[calpassapi]{calpass_get_token}.
+##' @param token_client_id (optional, required if \code{token} is not specified) client_id passed to \link[calpassapi]{calpass_get_token}.
+##' @param token_scope (optional, required if \code{token} is not specified) scope passed to \link[calpassapi]{calpass_get_token}.
 ##' @return a data frame with columns \code{interSegmentKey}, \code{status_code} (the http response code: 200 means student was found, 204 means student was not found, 429 means the api limit was reached and student was not processed, and anything else in the 400's correspond to http errors.)
 ##' @author Vinh Nguyen
 ##' @references \href{https://mmap.calpassplus.org/docs/index.html}{MMAP API V1}
@@ -150,9 +162,13 @@ calpass_get_token <- function(username=Sys.getenv('cp_api_uid'), password=Sys.ge
 ##' @importFrom jsonlite fromJSON
 ##' @importFrom dplyr bind_rows
 calpass_query <- function(interSegmentKey, token, api_url='https://mmap.calpassplus.org/api', endpoint=c('transcript', 'placement'), verbose=FALSE) {
+  if (token$expiration_time < Sys.time()) {
+    stop(paste('The token has expired at', token$expiration_time))
+  }
   endpoint <- match.arg(endpoint)
   cp_response <- GET(url=paste0(api_url, '/', endpoint, '/', interSegmentKey)
-                   , add_headers(c(Authorization=paste('Bearer', token)))
+                   # , add_headers(c(Authorization=paste('Bearer', token))) # Old where `calpass_get_token` only returned the access token string by itself
+                   , add_headers(c(Authorization=paste(token$token_type, token$access_token)))
                    , content_type('application/json')
                    , if (verbose) verbose() else NULL
                      )
@@ -168,7 +184,7 @@ calpass_query <- function(interSegmentKey, token, api_url='https://mmap.calpassp
 
 ##' @describeIn calpass_query Query data from CalPASS API endpoints with a vector of interSegmentKey's.  The number of rows returned corresponds to the number of unique interSegmentKey's.
 ##' @export
-calpass_query_many <- function(interSegmentKey, token, api_url='https://mmap.calpassplus.org/api', endpoint=c('transcript', 'placement'), verbose=FALSE, api_call_limit=150, limit_per_n_sec=60, wait=FALSE) {
+calpass_query_many <- function(interSegmentKey, token, api_url='https://mmap.calpassplus.org/api', endpoint=c('transcript', 'placement'), verbose=FALSE, api_call_limit=3200, limit_per_n_sec=3600, wait=FALSE, token_username, token_password, token_client_id, token_scope) {
   if (length(unique(interSegmentKey)) < length(interSegmentKey)) {
     warning("interSegmentKey contains duplicates.  Will execute for unique cases only (returned rows will be the number of unique cases).")
     interSegmentKey <- unique(interSegmentKey)
@@ -181,6 +197,28 @@ calpass_query_many <- function(interSegmentKey, token, api_url='https://mmap.cal
   }
 
   n_batches <- ceiling(n_isk / api_call_limit)
+
+  if (!missing(token)) {
+    
+    if (token$expiration_time < Sys.time()) {
+      stop(paste('The token has expired at', token$expiration_time))
+    }
+    
+    if(n_batches > 1 & token$expiration_time < (Sys.time() + n_batches * limit_per_n_sec * 60)) {
+      stop(paste0('The token will expire during the run at ', token$expiration_time, ', and this job (with wait time) is expected to end after this time.  Suggestion: instead of specifying token, specify token_username, token_password, token_client_id, and token_scope.'))
+    }
+    
+    use_credentials <- FALSE
+    
+  } else {
+
+    if(any(missing(token_username), missing(token_password), missing(token_client_id), missing(token_scope))) {
+      stop("Please specify the following: token_username, token_password, token_client_id, and token_scope.")
+    }
+    
+    use_credentials <- TRUE
+    token <- calpass_get_token(username=token_username, password=token_password, client_id=token_client_id, scope=token_scope)
+  }
   
   endpoint <- match.arg(endpoint) 
 
@@ -189,6 +227,10 @@ calpass_query_many <- function(interSegmentKey, token, api_url='https://mmap.cal
   } else {
     results_of_batches <- list()
     for (i in 1:n_batches) {
+      if (use_credentials) {
+        # Refresh token
+        token <- calpass_get_token(username=token_username, password=token_password, client_id=token_client_id, scope=token_scope)
+      }
       cat('Batch i =', i, 'of', n_batches, '\n')
       idx <- (api_call_limit*(i-1) + 1):pmin(api_call_limit*i, n_isk)
       cat('  Indices:', min(idx), 'to', max(idx), '\n')
