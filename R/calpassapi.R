@@ -79,7 +79,6 @@ calpass_create_isk <- function(first_name, last_name, gender, birthdate) {
 ##' @param verbose If \code{TRUE}, then print http exchanges (to assist with debugging).  Defaults to \code{FALSE}.
 ##' @return CalPASS token string
 ##' @author Vinh Nguyen
-##' @references \href{https://mmap.calpassplus.org/Documentation/Authentication}{MMAP API V1: Getting An Access Token Using User Credentials}
 ##' @examples
 ##' \dontrun{
 ##' cp_token <- calpass_get_token(username='my_cp_api_uid', password='my_cp_api_pwd'
